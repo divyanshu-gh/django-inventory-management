@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Tracker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Inventory Tracker</h1>
+        
+        {% if low_stock_items %}
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> These items have low stock:
+                <ul>
+                    {% for item in low_stock_items %}
+                    <li>{{ item.name }} ({{ item.quantity }} left)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Date Added</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price }}</td>
+                    <td>{{ item.date_added }}</td>
+                    <td>
+                        <a href="{% url 'edit_item' item.pk %}" class="btn btn-warning">Edit</a>
+                        <a href="{% url 'delete_item' item.pk %}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">No items found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <a href="{% url 'add_item' %}" class="btn btn-primary">➕ Add New Item</a>
+
+        <hr>
+        
+        <!-- Chart.js Container -->
+        <h2>📊 Inventory Visualization</h2>
+        <canvas id="inventoryChart" width="400" height="200"></canvas>
+        
+        <script>
+            var ctx = document.getElementById('inventoryChart').getContext('2d');
+            var inventoryChart = new Chart(ctx, {
+                type: 'bar',  // Chart type: bar chart
+                data: {
+                    labels: [{% for item in items %}"{{ item.name }}", {% endfor %}],  // Item names as labels
+                    datasets: [{
+                        label: 'Stock Quantity',
+                        data: [{% for item in items %}{{ item.quantity }}, {% endfor %}],  // Item quantities as data
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
